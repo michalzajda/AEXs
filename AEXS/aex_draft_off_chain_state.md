@@ -13,8 +13,8 @@ Created: 2019-09-24
 
 ## Simple Summary
 
-This expansion defines way of orchestrating updates to users data
-across 3rd party systems without bloating blockchain state.
+This expansion proposes way of orchestrating updates to users data
+across 3rd party systems like key/value databases. It is to avoid bloating blockchain state.
 
 ## Abstract
 
@@ -113,9 +113,9 @@ AEX-X payload has one required field: `data`
 
 * `data` is arbitrary data understood by 3rd party
 
-* `dest` is used to cheaply determine if the `message` is send to given subscriber.
+* `tag` is used to cheaply determine if the `message` is send to given subscriber.
 
-`dest` reduces overhead of trying to decode every message, but it is not reserved value
+`tag` reduces overhead of trying to decode every message, but it is not reserved value
 and may cause conflicts.
 
 
@@ -127,7 +127,7 @@ of data and reason about completeness of obtained data.
 Root of the tree should be added to custom `data` field.
 
 Root mismatch may indicate lack of data due to chain fork or
-excess of data in case of `dest` collision.
+excess of data in case of `tag` collision.
 
 ### JSON payload schema
 
@@ -142,7 +142,7 @@ excess of data in case of `dest` collision.
       "description": "Arbitrary data",
       "type": "string"
     },
-    "dest": {
+    "tag": {
       "description": "Tag to use by 3rd party, to distinguish destination",
       "type": "string"
     }
@@ -158,7 +158,7 @@ Payload:
 ```
 {
   "data": "Hello Joe."
-  "dest": "Mike"
+  "tag": "Mike"
 }
 ```
 
@@ -229,6 +229,17 @@ only in the subset of emitted data.
    Another vendors may use this information. Examples:
    * hash of unique object in the game
    * hash of the song that is playing
+
+4. Blockchain based DNS service
+   Part of the DNS protocol is key value datastore. Lets apply the expansion to build
+   Requirement for DNS is to have unique name. The solution would be:
+   1. Claim a name
+   2. Update it to point to an account address in AE blockchain
+   3. Execute `zero spend` to yourself using the `name` with `IP` in payload
+   4. Have a listener that will pick all the `zero spends` that are from `name` to `name`
+   5. Build a DNS mappings based on payloads in `zero spends`. Domain name is
+       `name` and the `IP` is in the payload
+
 
 
 ## Implementation
